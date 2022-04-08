@@ -1,0 +1,284 @@
+\documentclass[UTF8]{ctexart}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{lmodern}
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{ %
+  language=Octave,                % the language of the code
+  basicstyle=\footnotesize,           % the size of the fonts that are used for the code
+  numbers=left,                   % where to put the line-numbers
+  numberstyle=\tiny\color{gray},  % the style that is used for the line-numbers
+  stepnumber=1,                   % the step between two line-numbers. If it's 1, each line 
+                                  % will be numbered
+  numbersep=5pt,                  % how far the line-numbers are from the code
+  backgroundcolor=\color{white},      % choose the background color. You must add \usepackage{color}
+  showspaces=false,               % show spaces adding particular underscores
+  showstringspaces=false,         % underline spaces within strings
+  showtabs=false,                 % show tabs within strings adding particular underscores
+  frame=single,                   % adds a frame around the code
+  rulecolor=\color{black},        % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. commens (green here))
+  tabsize=2,                      % sets default tabsize to 2 spaces
+  captionpos=b,                   % sets the caption-position to bottom
+  breaklines=true,                % sets automatic line breaking
+  breakatwhitespace=false,        % sets if automatic breaks should only happen at whitespace
+  title=\lstname,                   % show the filename of files included with \lstinputlisting;
+                                  % also try caption instead of title
+  keywordstyle=\color{blue},          % keyword style
+  commentstyle=\color{dkgreen},       % comment style
+  stringstyle=\color{mauve},         % string literal style
+  escapeinside={\%*}{*)},            % if you want to add LaTeX within your code
+  morekeywords={*,...}               % if you want to add more keywords to the set
+}
+
+
+\title{\Huge \textbf{$\pi$值的计算}}
+\author{Chaos1025}
+\date{\today}
+
+\begin{document}
+    \maketitle
+    \tableofcontents
+    \section{蒲丰问题}
+
+    \subsection{问题描述(Buffon's Needle)}
+        在法国数学家蒲丰(Georges Louis Leclere de Buffon, 1707-1788)1777年出版的著作《或然性算术试验》中提出并解决了下列问题：把一个小薄圆片投入被分为几多个小正方形的矩形
+        域中，求使小圆片完全落入某一小正方形内部的概率是多少，接着讨论了投掷正方形薄片和针形物时的概率题目。这些题目都
+        称为蒲丰问题。其中投针题目可述为：设在平面上有一组平行线，其距都即是D，把一根长$l<D$的针随机投上去，则这根针和
+        一条直线相交的概率是$\frac{2l}{\pi D}$
+       
+
+        其设计的投针实验的步骤如下：\newline
+        1） 取一张白纸，上面画着许多条间隔为D的平行线\\
+        2） 取一根长度为l($l\leq a$)的针，随机地向上述的纸上投掷n次，记录针与直线相交的次数，记为m\\
+        3） 计算针与直线相交的概率\\
+             
+        
+    \subsection{程序仿真}
+        为模拟上述的蒲丰投针实验，我们在此使用MATLAB对上述过程进行程序仿真\par
+        具体程序内容如下所示
+    \subsubsection{程序内容}
+        实现蒲丰投针的函数定义如下，其中MAX参数表示投针次数，show参数表示是否将与线相交的针显示出来
+    \begin{lstlisting}[title=Function for Buffon's Needle, frame=shadowbox]
+function [P] = Pi_Buffon(MAX,show)
+    % 初始化
+    theta=zeros(1,MAX);% 针的角度
+    dx=zeros(1,MAX);% 针的中点位置
+    dy=zeros(1,MAX);
+    cross=0;% 相交次数
+    length=1/2;% 针的长度
+    x=0:0.01:5;% 绘制线
+    l1=zeros(1,501);
+    for i = 1:MAX
+        theta(i)=rand*pi;%角度随机
+        %中心坐标随机
+        dx(i)=rand*4.5+1/4;
+        dy(i)=rand-1/2;
+        if abs(dy(i))<1/2*length*sin(theta(i))% 如果相交
+            cross=cross+1;
+            xm=1/2*length*abs(cos(theta(i)));% 针在水平方向上的投影长度的一半
+            if show == 1 % 对针进行绘图
+                xd=(dx(i)-xm):0.002:(dx(i)+xm);
+                yd=tan(theta(i)).*(xd-dx(i))+dy(i);
+                plot(xd,yd);
+                hold on;
+            end
+        end
+    end
+    if show == 1
+        plot(x,l1,'r');
+        hold on;
+        title('Buffon');
+        axis([0 5 -0.75 0.75]);
+    end
+    P=cross/MAX;
+end
+    \end{lstlisting}
+    \paragraph{}
+        并在matlab对应的工作区内输入如下的命令
+    \begin{lstlisting}[title=Simulation for Buffon's Needle, frame=shadowbox]
+p=Pi_Buffon(10000,1);
+1/p
+    \end{lstlisting}
+    \paragraph{}
+        即完成对蒲丰投针实验的一次仿真，仿真结果如下一部分所示
+        
+    
+    \subsubsection{仿真结果}
+    \paragraph{}
+    计算所得$\pi$的估计值如下
+    \begin{lstlisting}[title=Result for Buffon's Needle, frame=shadowbox]
+ans =
+        3.1456
+    \end{lstlisting}
+    输出的图形结果如下图所示\\
+    \includegraphics[width = .9\textwidth]{Buffon.png}   
+
+
+
+    \subsection{结果分析}
+        根据如上仿真的过程可知，蒲丰投针实验可得到$\pi$值小数点后两位的精确度。接下来我们对蒲丰投针实验背后的原理进行分析。
+    \subsubsection{几何概型}
+        首先我们从最简单的几何概型入手来考虑这个问题。\par
+        对于平面上一根随机投下的针，它有两个自由度，即我们可以通过两个变量，$\text{针与直线形成的夹角}\theta \text{以及针的中点与最近的直线的距离}d$来描述它的位置与姿态。
+    同时我们可以认为这两个变量都是随机分布的变量，即$RV. \theta, RV. d$，且满足$0\leq \theta \leq \pi,0\leq d\leq D/2$。此即它们在$\theta \text{-} d$平面上形成的样本空间。\par
+        而如果针与直线相交，应满足$(d,\theta)\in A=\{(d,\theta),0\leq d\leq \frac{l}{2}\sin\theta=\frac{D}{4}\sin\theta,0\leq \theta \leq \pi\}$\par
+        $\theta \text{-} d$平面上的样本空间如下图所示\\
+    \includegraphics[width = .9\textwidth]{region.png}
+        
+        其中A为针与线相交的事件对应的空间\par
+        从而相交的概率计算如下\[ P=\frac{\int_{0}^{\pi}\frac{D}{4}\sin \theta \mathrm{d}\theta}{0.5\pi D}=\frac{1}{\pi} \]
+
+        因此在多次重复实验后，以事件发生的频率估计概率，即可得到P的估计值$\hat{P}$，从而进一步得到对$\pi$的估计值$\hat{\pi}=1/\hat{P}$，从而通过投针实验完成了对$\pi$的计算
+
+    \subsubsection{交点数的期望(Buffon's Noodle)}
+        除了采用几何概型结合高等数学的方法计算面积大小之外，我们还可以采用一种更为直观也更为简洁的方法来证明这一点。\par
+        我们注意到，在当前$l=\frac{D}{2}<D$的情况下，针与线至多只有一个交点，因此针与线相交的概率即为求针与线有一个交点的概率。设离散型随机变量X表示针与线的交点数，则X的数学期望$E(X)=1\times P(X=1)+0\times P(X=0)=P(X=1)$
+    从而求针与线相交的概率也就转化为求RV.X的期望。\par
+        接下来，我们将针$l$看作许多长为$\Delta l$的小线段连接而成。当进行了足够多次的实验(频率逼近于概率)后，针将均匀落满整个平面，而这些小线段也将均匀分布在整个平面上。
+    因此这些小线段与线交点数的期望都相等，而由期望的线性性可知，由这些小线段构成的针与线交点数的期望为这些小线段与线交点数的期望之和，故有$E_l(X)=\sum E_{\Delta l}(X)\propto l$。\par
+        至此，我们知道所求期望$E_l(X)$与小线段总长度l成正比，而与这些小线段是如何连接的无关。为此，我们取极限$\Delta l\to 0$，而进一步将这些无限段的小线段拆开重新组合为一个圆$C$，因此圆$C$
+    的半径$r=\frac{l}{2\pi}$。也即一个长为$l(l=D/2<D)$的针与线交点数的期望$E_l(X)$和一个半径为$l/(2\pi)$的圆与线交点数的期望$E_C(X)$相等。而$E_C(X)$很容易通过一个一维的几何概型计算得到
+        \[ E_l(X)=E_C(X)=\frac{2r}{D/2}=\frac{1}{\pi} \]
+
+        由此我们通过一种更为简洁的方法证明了蒲丰投针实验的结论，即长度为$D/2$的针与线相交的概率为$1/\pi$
+
+
+    \section{其他方法}
+        在以上的内容中，我们通过蒲丰投针实验估算出了圆周率$\pi$的值，接下来我们尝试一下其他的办法来计算$\pi$的值。
+    \subsection{面积法}
+    \subsubsection{方法分析}
+        为了计算$\pi$的值，我们结合分析蒲丰问题时所用的几何概型的思想，即是要通过重复实验来逼近一个概率与$\pi$相关的事件的概率，从而得到对$\pi$值的估计。\par
+        因此我们构造这样的一个几何概型：在一个长为1的正方形S中有一个半径为1、圆心角为$\pi/2$的扇形A，则S的面积为$1$，A的面积为$\pi/4$。
+    现在我们向这个正方形S中投掷小点(不考虑大小)，则根据几何概型的知识容易算出小点落入A区域的概率是$\pi/4$，接着我们通过大量重复实验，以事件发生的频率去
+    估计概率，即可估算出$\pi$值的大小。
+    \subsubsection{程序仿真}
+        实现上述过程的matlab函数实现如下，其中MAX参数表示投点次数，show参数表示是否将满足条件的点显示出来
+        \begin{lstlisting}[title=Function for Sector in Square, frame=shadowbox]
+function [P]=Pi_MonteCarlo(MAX,show)
+    x=0:0.01:1;
+    y=sqrt(1-x.^2);
+    dx=zeros(1,MAX);
+    dy=zeros(1,MAX);
+    num = 0;
+    for i = 1:MAX
+        dx(i)=rand;
+        dy(i)=rand;
+        if dx(i)^2+dy(i)^2 <= 1
+            num = num + 1;
+        else
+            dx(i)=0;
+            dy(i)=0;
+        end
+    end
+    if show == 1
+        plot(x, y);
+        hold on;
+        scatter(dx,dy,1);
+        title('Pi Calculating');
+        axis square;
+    end
+    P=num/MAX * 4;
+end
+        \end{lstlisting}
+    并在matlab对应的工作区内输入如下的命令
+    \begin{lstlisting}[title=Simulation for Sector in Square, frame=shadowbox]
+Pi_MonteCarlo(10000000,1)
+    \end{lstlisting}
+    计算所得$\pi$的估计值如下
+    \begin{lstlisting}[title=Result for Sector in Square, frame=shadowbox]
+ans =
+        3.1417  
+    \end{lstlisting}
+    输出的图形结果如下图所示\\
+    \includegraphics[width = .9\textwidth]{MonteCarlo.png}
+    
+
+
+    \subsection{积分法}
+    \subsubsection{方法分析}
+        为了尝试另一种新的方法，我们考虑通过计算定积分来估算$\pi$，即有\[ \int_{0}^{1}\frac{1}{1+x^2} \mathrm{d}x = \frac{\pi}{4}\]
+    因此我们只需要计算出这样一个积分$I$的值即可\[ I=\int_{0}^{1}\frac{1}{1+x^2} \mathrm{d}x \] 
+    也就相当于计算在0到1的区域内曲线$\frac{1}{1+x^2}$与x轴包围的面积。
+    
+        为此我们重新考虑上一个方法中使用的投点法，计算在区域$(x,y) \in A = \{(x,y)|0 \leq x \leq 1,0\leq y\leq 1\}$中积分值I的大小，即相当于计算在区域A中投点，点落入
+    曲线与x轴之间区域的概率。进而我们就可以通过实验来估计$\pi$的值了。
+    \subsubsection{程序仿真}
+        实现上述过程的matlab函数实现如下，其中MAX参数表示投点次数，show参数表示是否将满足条件的点显示出来
+        \begin{lstlisting}[title=Function for Integration in Square, frame=shadowbox]
+function [P]=Pi_Integration(MAX,show)
+    x=0:0.01:1;
+    y=1./(1+x.^2);
+    dx=zeros(1,MAX);
+    dy=zeros(1,MAX);
+    num = 0;
+    for i = 1:MAX
+        dx(i)=rand;
+        dy(i)=rand;
+        if dy(i) <= 1/(1+dx(i)^2)
+            num = num+1;
+        else
+            dx(i)=0;
+            dy(i)=0;
+        end
+    end
+    if show == 1
+        plot(x, y);
+        hold on;
+        scatter(dx,dy,1);
+        title('Integration');
+        daspect([3 2 1])
+    end
+    P=num/MAX * 4;
+end
+        \end{lstlisting}
+    并在matlab对应的工作区内输入如下的命令
+    \begin{lstlisting}[title=Simulation for Integration in Square, frame=shadowbox]
+Pi_MonteCarlo(10000000,1)
+    \end{lstlisting}
+    计算所得$\pi$的估计值如下
+    \begin{lstlisting}[title=Result for Sector in Square, frame=shadowbox]
+ans =
+        3.1411  
+    \end{lstlisting}
+    输出的图形结果如下图所示\\
+    \includegraphics[width = .9\textwidth]{Integration.png}
+
+    \section{蒙特卡洛法}
+    \paragraph{}
+        在使用过上述三种利用概率论求$\pi$值的方法之后，我们能够发现，虽然这三种方法的具体操作步骤之间大相径庭，但
+    是其内在的核心思想都基本相近，即在要估算的值与某一事件的概率之间建立联系，然后再通过多次重复实验，以频率
+    估计概率的方式来估算概率，从而进一步得出目标值。而这样的思想也正是所谓蒙特卡罗算法的基本思想之所在。
+
+
+    \subsection{基本内容}
+        蒙特卡罗方法(Monte Carlo method)，也成为统计模拟方法，是在上世纪四十年代中期由于科学技术的发展和电子计算机的发明而被提出的
+    一种以概率统计理论为指导思想的一类重要的数值计算方法，而其理论基础就是概率论中的大数定律。
+    \subsubsection{基本思想}
+        当所求解的问题是某种随机事件出现的概率或某个随机变量的期望值时，我们可以通过重复某种实验
+        的方法，以该事件发生的频率来估计此随机事件的概率，或用以得到这个随机变量的某些数字特
+        征，并进而以此作为问题的解
+    \subsubsection{工作过程}
+    \paragraph{1.构造随机的概率过程}
+        对于本身具有随机性质的问题，我们只需要正确地描述并模拟这样的概率过程即可。但是对于本身不具有随即性质的确定性问题(例如这里
+    的计算$\pi$的值)，就需要人为构造一个合适的概率过程，使其某些参数恰好与所求问题相关或就是所求问题的解。例如在蒲丰实验中就将求解
+    $\pi$值转化为求解针与线相交的概率$\frac{1}{\pi}$。
+    \paragraph{2.从已知概率分布抽样}
+        各种概率模型都可以看作是由各种各样的概率分布构成的，因此产生已知概率分布的随机变量也就成为实现蒙特卡洛法的基本步骤。例如
+    在蒲丰投针实验中就是通过随机地投针来模拟、构造出在$d\text{-}\theta$平面上的一个矩形区域内均匀分布的二维连续型随机变量$RV.(d,\theta)$。
+    \paragraph{3.求解估计量}
+        在实现模拟实验后还需要确定一个随机变量用以得到所求问题的解。建立估计量就相当于对实验结果进行考察，从而得到问题的解。例如在
+    蒲丰投针实验中，所建立的估计量就是针与线是否相交这一事件。
+
+
+
+
+% \begin{thebibliography}{10}
+% \bibitem{ref1}Drew Armstrong.Buffon's Noodle[DB/OL].https://www.math.miami.edu/~armstrong/Talks/buffons_noodle.pdf
+% \end{thebibliography}
+\end{document}
